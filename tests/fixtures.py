@@ -1,6 +1,9 @@
+# standard library
 import sys
-import sublime
 from unittest import TestCase
+
+# pypi/conda library
+import sublime
 from unittesting import DeferrableTestCase
 
 sublack = sys.modules["sublack.sublack"]
@@ -34,10 +37,10 @@ def get_encoding_from_file( view):
 
 diff = """@@ -1,12 +1,12 @@
 +def get_encoding_from_file(view):
- 
+
 -def get_encoding_from_file( view):
 +    region = view.line(sublime.Region(0))
- 
+
 -    region = view.line( sublime.Region(0))
 -
 -    encoding = get_encoding_from_region( region, view)

@@ -1,9 +1,11 @@
-from fixtures import sublack as s
+# standard library
 import time
-
 from unittest import TestCase
 from unittest.mock import patch
+
+# pypi/conda library
 import requests
+from fixtures import sublack as s
 
 BlackdServer = s.BlackdServer
 
@@ -32,6 +34,7 @@ class TestBlackdServer(TestCase):
     """
 
     def setUp(self):
+        # standard library
         import platform
 
         self.return_code = 1 if platform.system() == "Windows" else 0
@@ -52,14 +55,10 @@ class TestBlackdServer(TestCase):
 
     def test_is_running_blackd_not_running_return_False(self):
         b = BlackdServer(timeout=0.001)
-        with patch.object(
-            s.server.requests, "post", side_effect=requests.ConnectionError
-        ) as m:
+        with patch.object(s.server.requests, "post", side_effect=requests.ConnectionError) as m:
             # b = sublack.server.BlackdServer(timeout=0)
             self.assertFalse(b.is_running())
-            m.assert_called_with(
-                "http://localhost:{}".format(b.port)
-            )  # ensure requests is called once
+            m.assert_called_with("http://localhost:{}".format(b.port))  # ensure requests is called once
 
     def test_is_running_blackd_running_return_True(self):
         global test_port
@@ -78,20 +77,14 @@ class TestBlackdServer(TestCase):
         self.assertTrue(self.serv.run())
         self.assertTrue(self.serv.is_running(), msg="should wait blackd is running")
         self.assertEqual(
-            self.serv.get_cached_pid(),
-            self.serv.proc.pid,
-            "cache should be written with pid",
+            self.serv.get_cached_pid(), self.serv.proc.pid, "cache should be written with pid",
         )
 
         BlackdServer().stop_deamon()
         self.assertEqual(
-            self.serv.proc.wait(timeout=2),
-            self.return_code,
-            "blackd should be stopped with return code 0",
+            self.serv.proc.wait(timeout=2), self.return_code, "blackd should be stopped with return code 0",
         )
-        self.assertFalse(
-            BlackdServer().get_cached_pid(), "should get a blank cached pid"
-        )
+        self.assertFalse(BlackdServer().get_cached_pid(), "should get a blank cached pid")
 
     def test_run_start_fail(self):
         global test_port
@@ -106,9 +99,5 @@ class TestBlackdServer(TestCase):
         self.assertTrue(running)
 
     def test_blackd_path(self):
-        self.serv = BlackdServer(
-            sleep_time=0,
-            checker_interval=0,
-            settings=({"black_command": "/bla/ble/black"}),
-        )
+        self.serv = BlackdServer(sleep_time=0, checker_interval=0, settings=({"black_command": "/bla/ble/black"}),)
         self.assertEqual(self.serv.blackd_cmd, "/bla/ble/blackd")

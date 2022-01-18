@@ -1,5 +1,4 @@
 {
-
-    "capture_console": true,
-    "deferred": true
+  "capture_console": true,
+  "deferred": true
 }

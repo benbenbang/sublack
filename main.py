@@ -3,24 +3,28 @@ Sublack
 
 Order of imports should not be changed
 """
+# standard library
 import logging
-import sublime
 import os
-from .sublack import (
+
+# pypi/conda library
+import sublime
+
+from .sublack import (  # flake8: noqa
     PACKAGE_NAME,
     SETTINGS_FILE_NAME,
-    get_settings,
-    cache_path,
-    clear_cache,
-    Path,
-    BlackFileCommand,
     BlackDiffCommand,
-    BlackToggleBlackOnSaveCommand,
-    BlackEventListener,
     BlackdStartCommand,
     BlackdStopCommand,
+    BlackEventListener,
+    BlackFileCommand,
     BlackFormatAllCommand,
-)  # flake8: noqa
+    BlackToggleBlackOnSaveCommand,
+    Path,
+    cache_path,
+    clear_cache,
+    get_settings,
+)
 
 LOG = logging.getLogger(PACKAGE_NAME)
 
@@ -36,9 +40,7 @@ def plugin_loaded():
         config["black_log"] = "info"
     # Setup  logging
     if not LOG.handlers:
-        debug_formatter = logging.Formatter(
-            "[{}:%(filename)s](%(levelname)s) %(message)s".format(PACKAGE_NAME)
-        )
+        debug_formatter = logging.Formatter("[{}:%(filename)s](%(levelname)s) %(message)s".format(PACKAGE_NAME))
         dh = logging.StreamHandler()
         dh.setLevel(logging.DEBUG)
         dh.setFormatter(debug_formatter)
@@ -66,6 +68,4 @@ def plugin_loaded():
         sublime.set_timeout_async(lambda: current_view.run_command("blackd_start"), 0)
 
     # watch for loglevel change
-    sublime.load_settings(SETTINGS_FILE_NAME).add_on_change(
-        "black_log", lambda: Path(__file__).touch()
-    )
+    sublime.load_settings(SETTINGS_FILE_NAME).add_on_change("black_log", lambda: Path(__file__).touch())

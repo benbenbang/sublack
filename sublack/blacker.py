@@ -2,35 +2,26 @@
 """
 Sublime Text 3 Plugin to invoke Black on a Python file.
 """
-import os.path
+# standard library
+import logging
 import os
+import os.path
 import subprocess
 
+# pypi/conda library
+import requests
 import sublime
 
-import requests
-import logging
-
 from .consts import (
-    HEADERS_TABLE,
     ALREADY_FORMATTED_MESSAGE,
     ALREADY_FORMATTED_MESSAGE_CACHE,
-    STATUS_KEY,
+    HEADERS_TABLE,
     PACKAGE_NAME,
     REFORMATTED_MESSAGE,
+    STATUS_KEY,
 )
-from .utils import (
-    get_settings,
-    get_encoding_from_file,
-    cache_path,
-    find_root_file,
-    use_pre_commit,
-    Path,
-    get_env,
-)
-
-from .folding import get_folded_lines, get_ast_index, refold_all
-
+from .folding import get_ast_index, get_folded_lines, refold_all
+from .utils import Path, cache_path, find_root_file, get_encoding_from_file, get_env, get_settings, use_pre_commit
 
 LOG = logging.getLogger(PACKAGE_NAME)
 
@@ -99,23 +90,13 @@ class Blackd:
 
     def __call__(self):
 
-        self.headers.update(
-            {"Content-Type": "application/octet-stream; charset=" + self.encoding}
-        )
-        url = (
-            "http://"
-            + self.config["black_blackd_host"]
-            + ":"
-            + self.config["black_blackd_port"]
-            + "/"
-        )
+        self.headers.update({"Content-Type": "application/octet-stream; charset=" + self.encoding})
+        url = "http://" + self.config["black_blackd_host"] + ":" + self.config["black_blackd_port"] + "/"
         try:
             response = requests.post(url, data=self.content, headers=self.headers)
         except requests.ConnectionError as err:
 
-            msg = "blackd not running on port {}".format(
-                self.config["black_blackd_port"]
-            )
+            msg = "blackd not running on port {}".format(self.config["black_blackd_port"])
             response = self.process_errros(msg)
             sublime.message_dialog(msg + ", you can start it with blackd_start command")
         except Exception as err:
@@ -139,9 +120,7 @@ class Black:
 
         LOG.debug("config: %s", self.config)
         if self.config["black_use_precommit"]:
-            self.pre_commit_config = use_pre_commit(
-                find_root_file(self.view, ".pre-commit-config.yaml")
-            )
+            self.pre_commit_config = use_pre_commit(find_root_file(self.view, ".pre-commit-config.yaml"))
         else:
             self.pre_commit_config = False
 
@@ -201,9 +180,7 @@ class Black:
         # win32: hide console window
         if sublime.platform() == "windows":
             startup_info = subprocess.STARTUPINFO()
-            startup_info.dwFlags = (
-                subprocess.CREATE_NEW_CONSOLE | subprocess.STARTF_USESHOWWINDOW
-            )
+            startup_info.dwFlags = subprocess.CREATE_NEW_CONSOLE | subprocess.STARTF_USESHOWWINDOW
             startup_info.wShowWindow = subprocess.SW_HIDE
         else:
             startup_info = None
@@ -241,16 +218,12 @@ class Black:
         except UnboundLocalError as err:  # unboud pour p si popen echoue
             msg = "You may need to install Black and/or configure 'black_command' in Sublack's Settings."
             sublime.error_message("OSError: %s\n\n%s" % (err, msg))
-            raise OSError(
-                "You may need to install Black and/or configure 'black_command' in Sublack's Settings."
-            )
+            raise OSError("You may need to install Black and/or configure 'black_command' in Sublack's Settings.")
 
         except OSError as err:  # unboud pour p si popen echoue
             msg = "You may need to install Black and/or configure 'black_command' in Sublack's Settings."
             sublime.error_message("OSError: %s\n\n%s" % (err, msg))
-            raise OSError(
-                "You may need to install Black and/or configure 'black_command' in Sublack's Settings."
-            )
+            raise OSError("You may need to install Black and/or configure 'black_command' in Sublack's Settings.")
 
         LOG.debug("run_black: returncode %s, err: %s", p.returncode, err)
         return p.returncode, out, err
@@ -347,6 +320,7 @@ class Black:
     def format_via_precommit(self, edit, content, cwd, env):
         cmd = ["pre-commit", "run", "black", "--files"]
 
+        # standard library
         import tempfile
 
         tmp_file = tempfile.NamedTemporaryFile(suffix=".py", delete=False)
@@ -368,7 +342,7 @@ class Black:
                 stderr=subprocess.STDOUT,
                 stdout=subprocess.PIPE,
             )
-            print(a.stdout.read())
+            print((a.stdout.read()))
         except subprocess.CalledProcessError as err:
             LOG.error(err)
             return err
@@ -402,9 +376,7 @@ class Black:
 
         # call black or balckd
 
-        if (
-            self.config["black_use_blackd"] and "--diff" not in extra
-        ):  # no diff with server
+        if self.config["black_use_blackd"] and "--diff" not in extra:  # no diff with server
             LOG.debug("using blackd")
             returncode, out, err = Blackd(cmd, content, encoding, self.config)()
         else:

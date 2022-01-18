@@ -11,7 +11,7 @@
 
       // If --fast given, skip temporary sanity checks.
       "black_fast": false,
-      
+
       // prevent black from changing single quote to double quotes
       // default is false
       // add --black_skip_string_normalization
@@ -58,5 +58,5 @@
 
       // Disable formatll command
       "black_confirm_formatall": true
- 
+
 }

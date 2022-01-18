@@ -1,5 +1,19 @@
+# standard library
+import locale
+import logging
+import os
+import pathlib
 import re
+import signal
+import socket
+import subprocess
+
+# pypi/conda library
+import requests
 import sublime
+import toml
+import yaml
+
 from .consts import (
     CONFIG_OPTIONS,
     ENCODING_PATTERN,
@@ -9,44 +23,26 @@ from .consts import (
     SETTINGS_NS_PREFIX,
 )
 
-import pathlib
-import subprocess
-import signal
-import os
-import locale
-import socket
-import requests
-import logging
-import yaml
-import toml
-
 LOG = logging.getLogger("sublack")
 
 
 class Path(type(pathlib.Path())):
-    def write_text(
-        self, content, mode="w", buffering=-1, encoding=None, errors=None, newline=None
-    ):
+    def write_text(self, content, mode="w", buffering=-1, encoding=None, errors=None, newline=None):
 
-        with self.open(
-            mode="w", buffering=-1, encoding=None, errors=None, newline=None
-        ) as file:
+        with self.open(mode="w", buffering=-1, encoding=None, errors=None, newline=None) as file:
 
             return file.write(content)
 
-    def read_text(
-        self, mode="w", buffering=-1, encoding=None, errors=None, newline=None
-    ):
+    def read_text(self, mode="w", buffering=-1, encoding=None, errors=None, newline=None):
 
-        with self.open(
-            mode="r", buffering=-1, encoding=None, errors=None, newline=None
-        ) as file:
+        with self.open(mode="r", buffering=-1, encoding=None, errors=None, newline=None) as file:
 
             return file.read()
 
 
 def timed(fn):
     def to_time(*args, **kwargs):
+        # standard library
         import time
 
         st = time.time()
@@ -186,9 +182,7 @@ def shell():
 def kill_with_pid(pid: int):
     if sublime.platform() == "windows":
         # need to properly kill precess traa
-        subprocess.call(
-            ["taskkill", "/F", "/T", "/PID", str(pid)], startupinfo=startup_info()
-        )
+        subprocess.call(["taskkill", "/F", "/T", "/PID", str(pid)], startupinfo=startup_info())
     else:
         os.kill(pid, signal.SIGTERM)
 
@@ -338,18 +332,14 @@ def clear_cache():
 
 
 def is_python3_executable(python_executable, default_shell=None):
-    find_version = '{} -c "import sys;print(sys.version_info.major)"'.format(
-        python_executable
-    )
+    find_version = '{} -c "import sys;print(sys.version_info.major)"'.format(python_executable)
     default_shell = None
 
     if sublime.platform() != "windows":
         default_shell = os.environ.get("SHELL", "/bin/bash")
 
     try:
-        version_out = subprocess.check_output(
-            find_version, shell=True, executable=default_shell
-        ).decode()
+        version_out = subprocess.check_output(find_version, shell=True, executable=default_shell).decode()
 
     except FileNotFoundError:
         LOG.debug("is_python3_executable : FileNotFoundError")
@@ -431,8 +421,7 @@ def get_python3_executable(config=None):
             LOG.debug("guessing from black_command")
             if is_python3_executable(python_exec):
                 LOG.debug(
-                    "using %s as python3 interpreter guess from black_command",
-                    python_exec,
+                    "using %s as python3 interpreter guess from black_command", python_exec,
                 )
 
                 return python_exec

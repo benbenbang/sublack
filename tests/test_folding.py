@@ -1,8 +1,10 @@
+# standard library
 from unittest import TestCase
 from unittest.mock import MagicMock
 
-from fixtures import sublack
+# pypi/conda library
 import sublime
+from fixtures import sublack
 
 Path = sublack.utils.Path
 
@@ -72,15 +74,15 @@ class Sel:
 class TestFolding(TestCase):
     def test_get_folded_lines(self):
         v = View(SAMPLE)
-        self.assertEquals(len(SAMPLE), 56)
+        self.assertEqual(len(SAMPLE), 56)
 
         v._unfold = [sublime.Region(8, 55)]
         t = sublack.folding.get_folded_lines(v)
-        self.assertEquals(t, [1])
+        self.assertEqual(t, [1])
 
         v._unfold = [sublime.Region(21, 55)]
         t = sublack.folding.get_folded_lines(v)
-        self.assertEquals(t, [2])
+        self.assertEqual(t, [2])
 
     def test_region_to_refold(self):
         v = View(SAMPLE)
@@ -91,25 +93,19 @@ class TestFolding(TestCase):
             v._sel.add(sublime.Region(9, 56))
 
         v.run_command = run_command
-        self.assertEquals(
-            sublime.Region(8, 55), sublack.folding.get_region_to_refold(0, v)
-        )
+        self.assertEqual(sublime.Region(8, 55), sublack.folding.get_region_to_refold(0, v))
 
         def run_command(x, args):
             v._sel.clear()
             v._sel.add(sublime.Region(22, 56))
 
         v.run_command = run_command
-        self.assertEquals(
-            sublime.Region(21, 55), sublack.folding.get_region_to_refold(1, v)
-        )
+        self.assertEqual(sublime.Region(21, 55), sublack.folding.get_region_to_refold(1, v))
 
     def test_get_index_with_python33(self):
         body = b"a=1"
-        self.assertEquals(sublack.folding.get_index_with_python33(body), A_EQUAL_INDEX)
-        self.assertEquals(
-            sublack.folding.get_index_with_python33(SAMPLE.encode()), SAMPLE_INDEX
-        )
+        self.assertEqual(sublack.folding.get_index_with_python33(body), A_EQUAL_INDEX)
+        self.assertEqual(sublack.folding.get_index_with_python33(SAMPLE.encode()), SAMPLE_INDEX)
 
         with self.assertRaises(sublack.folding.FoldingError):
             sublack.folding.get_index_with_python33(b"a=")
@@ -122,12 +118,9 @@ class TestFolding(TestCase):
 
         v.settings = lambda: {"python_interpreter": inter}
 
-        self.assertEquals(
-            sublack.folding.get_index_with_interpreter(v, body, "utf-8"), A_EQUAL_INDEX
-        )
-        self.assertEquals(
-            sublack.folding.get_index_with_interpreter(v, SAMPLE.encode(), "utf-8"),
-            SAMPLE_INDEX,
+        self.assertEqual(sublack.folding.get_index_with_interpreter(v, body, "utf-8"), A_EQUAL_INDEX)
+        self.assertEqual(
+            sublack.folding.get_index_with_interpreter(v, SAMPLE.encode(), "utf-8"), SAMPLE_INDEX,
         )
         with self.assertRaises(sublack.folding.FoldingError):
             sublack.folding.get_index_with_interpreter(v, b"a=", "utf-8"),
@@ -139,25 +132,20 @@ class TestFolding(TestCase):
         m.get.return_value = "python"
         v.settings = lambda: m
         body = b"a=1"
-        self.assertEquals(
-            sublack.folding.get_ast_index(v, body, "utf-8"), A_EQUAL_INDEX
-        )
+        self.assertEqual(sublack.folding.get_ast_index(v, body, "utf-8"), A_EQUAL_INDEX)
 
         m.has.return_value = False
-        self.assertEquals(
-            sublack.folding.get_ast_index(v, body, "utf-8"), A_EQUAL_INDEX
-        )
+        self.assertEqual(sublack.folding.get_ast_index(v, body, "utf-8"), A_EQUAL_INDEX)
 
-        self.assertEquals(sublack.folding.get_ast_index(v, b"a=", "utf-8"), False)
+        self.assertEqual(sublack.folding.get_ast_index(v, b"a=", "utf-8"), False)
 
     def test_get_new_lines(self):
         old = [1, 5, 9, 10, 12, 99, 1, 10, 99]
         new = [1, 8, 9, 11, 15, 99, 1, 20, 100]
         folded_lines = [1, 5, 10, 99]
 
-        self.assertEquals(
-            sorted(sublack.folding.get_new_lines(old, new, folded_lines)),
-            [0, 7, 10, 98],
+        self.assertEqual(
+            sorted(sublack.folding.get_new_lines(old, new, folded_lines)), [0, 7, 10, 98],
         )
 
     def test_get_new_lines_line0(self):
@@ -166,6 +154,4 @@ class TestFolding(TestCase):
 
         folded_lines = [3]
 
-        self.assertEquals(
-            sorted(sublack.folding.get_new_lines(old, new, folded_lines)), [0]
-        )
+        self.assertEqual(sorted(sublack.folding.get_new_lines(old, new, folded_lines)), [0])

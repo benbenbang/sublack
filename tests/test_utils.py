@@ -1,12 +1,14 @@
+# standard library
+import os
+import platform
+import re
+import tempfile
 from unittest import TestCase, skipIf
 from unittest.mock import MagicMock, patch
 
-from fixtures import sublack, pre_commit_config
+# pypi/conda library
 import sublime
-import re
-import tempfile
-import os
-import platform
+from fixtures import pre_commit_config, sublack
 
 Path = sublack.utils.Path
 
@@ -92,17 +94,13 @@ class TestUtils(TestCase):
                 return []
 
         with patch.object(sublack.utils.sublime, "load_settings", return_value=globale):
-            with patch.object(
-                sublack.utils, "read_pyproject_toml", return_value=pyproject
-            ):
+            with patch.object(sublack.utils, "read_pyproject_toml", return_value=pyproject):
                 settings = sublack.utils.get_settings(View)
 
         ##### tests ##########
 
         # keep the number of settings
-        self.assertEqual(
-            len(globale), len(res), "should keep same number of setting item"
-        )
+        self.assertEqual(len(globale), len(res), "should keep same number of setting item")
 
         # good dispatch of settings
         self.assertEqual(settings, res)
@@ -123,9 +121,7 @@ class TestUtils(TestCase):
         x = sublack.utils.get_encoding_from_region(1, v)
         self.assertEqual(x, "latin-1")
 
-    @patch.object(
-        sublack.utils, "get_encoding_from_region", return_value="premiere ligne"
-    )
+    @patch.object(sublack.utils, "get_encoding_from_region", return_value="premiere ligne")
     def test_encoding_from_file(self, m):
         e = sublack.utils.get_encoding_from_file(MagicMock())
         self.assertEqual(e, "premiere ligne")
@@ -148,9 +144,7 @@ class TestUtils(TestCase):
     def test_find_root_file_no_folder_in_filepath(self):
         with tempfile.TemporaryDirectory() as T:
             root = Path(T)
-            view = View(
-                Window({"file_path": "/bla/bla"}, ["/ble"])
-            )  # root folder not in filepath
+            view = View(Window({"file_path": "/bla/bla"}, ["/ble"]))  # root folder not in filepath
             self.assertIsNone(sublack.utils.find_root_file(view, "some.file"))
 
     def test_find_root_file_no_root_file(self):
@@ -174,12 +168,7 @@ class TestUtils(TestCase):
             pp = root / "some.file"
             pp.touch()
 
-            view = View(
-                Window(
-                    {"file_path": str(Path(T, "some", "sub", "dirs", "working.py"))},
-                    [T],
-                )
-            )
+            view = View(Window({"file_path": str(Path(T, "some", "sub", "dirs", "working.py"))}, [T],))
             self.assertEqual(sublack.utils.find_root_file(view, "some.file"), pp)
 
     def test_find_root_file_filepath_in_subdirs_with_root_file(self):
@@ -204,12 +193,7 @@ class TestUtils(TestCase):
             subpp = sub / "some.file"
             subpp.touch()
 
-            view = View(
-                Window(
-                    {"file_path": str(Path(T, "some", "sub", "dirs", "working.py"))},
-                    [T],
-                )
-            )
+            view = View(Window({"file_path": str(Path(T, "some", "sub", "dirs", "working.py"))}, [T],))
             self.assertEqual(sublack.utils.find_root_file(view, "some.file"), subpp)
 
     def test_read_pyproject(self):
@@ -283,9 +267,7 @@ class TestUtils(TestCase):
         with patch.object(sublack.utils.locale, "getdefaultlocale", return_value=1):
             self.assertEqual(env, ge())
 
-        with patch.object(
-            sublack.utils.locale, "getdefaultlocale", return_value=(None, None)
-        ):
+        with patch.object(sublack.utils.locale, "getdefaultlocale", return_value=(None, None)):
             with patch.object(sublack.utils, "sublime") as m:
                 m.platform.return_value = "linux"
                 self.assertDictEqual(env, ge())
@@ -310,16 +292,12 @@ class TestPythonExecutable(TestCase):
             self.assertFalse(sublack.utils.is_python3_executable("python3"))
 
         # version is not 3
-        with patch.object(
-            sublack.utils.subprocess, "check_output", return_value=b"2\n"
-        ):
+        with patch.object(sublack.utils.subprocess, "check_output", return_value=b"2\n"):
             self.assertFalse(sublack.utils.is_python3_executable("python3"))
 
     def test_is_python3_executable_is_python3(self):
         # version is  3
-        with patch.object(
-            sublack.utils.subprocess, "check_output", return_value=b"3\n"
-        ):
+        with patch.object(sublack.utils.subprocess, "check_output", return_value=b"3\n"):
             self.assertTrue(sublack.utils.is_python3_executable("python3"))
 
     @skipIf(platform.system() == "Windows", "unix tests")
@@ -331,41 +309,25 @@ class TestPythonExecutable(TestCase):
 
         # if no python3 and python returns nothing
         with patch.object(
-            sublack.utils.subprocess,
-            "check_output",
-            return_value=b"BLA=fzefzefef\nPATH=/pythonxx:/usr/bin/blaqsfs:",
+            sublack.utils.subprocess, "check_output", return_value=b"BLA=fzefzefef\nPATH=/pythonxx:/usr/bin/blaqsfs:",
         ):
             self.assertFalse(sublack.utils.find_python3_executable())
 
         # if  python3 in a path
-        good_path = (
-            b"/usr/local/bin/" if platform.system() == "Darwin" else b"/usr/bin/"
-        )
+        good_path = b"/usr/local/bin/" if platform.system() == "Darwin" else b"/usr/bin/"
         with patch.object(
-            sublack.utils.subprocess,
-            "check_output",
-            return_value=b"BLA=fzefzefef\nPATH=/pythonxx:" + good_path + b":",
+            sublack.utils.subprocess, "check_output", return_value=b"BLA=fzefzefef\nPATH=/pythonxx:" + good_path + b":",
         ):
 
-            self.assertEqual(
-                sublack.utils.find_python3_executable(), good_path.decode() + "python3"
-            )
+            self.assertEqual(sublack.utils.find_python3_executable(), good_path.decode() + "python3")
 
         # # if no python3 but  python returns a python3 interpreter
         with patch.object(
-            sublack.utils.subprocess,
-            "check_output",
-            return_value=b"BLA=fzefzefef\nPATH=/pythonxx:/usr/bin/:",
+            sublack.utils.subprocess, "check_output", return_value=b"BLA=fzefzefef\nPATH=/pythonxx:/usr/bin/:",
         ):
-            with patch.object(
-                sublack.Path, "exists", side_effect=[False, False, False, False, True]
-            ):
-                with patch.object(
-                    sublack.utils, "is_python3_executable", return_value=True
-                ):
-                    self.assertEqual(
-                        sublack.utils.find_python3_executable(), "/usr/bin/python"
-                    )
+            with patch.object(sublack.Path, "exists", side_effect=[False, False, False, False, True]):
+                with patch.object(sublack.utils, "is_python3_executable", return_value=True):
+                    self.assertEqual(sublack.utils.find_python3_executable(), "/usr/bin/python")
 
     @skipIf(platform.system() != "Windows", "Windows tests")
     def test_find_python3_executable_windows(self):
@@ -374,21 +336,13 @@ class TestPythonExecutable(TestCase):
         self.assertTrue(sublack.utils.find_python3_executable().endswith("python.exe"))
 
         # if no python3 and python returns a python2 interpreter
-        with patch.object(
-            sublack.utils.subprocess, "check_output", return_value=b"bla\r\npython2\r\n"
-        ):
-            with patch.object(
-                sublack.utils, "is_python3_executable", side_effect=[False, False]
-            ):
+        with patch.object(sublack.utils.subprocess, "check_output", return_value=b"bla\r\npython2\r\n"):
+            with patch.object(sublack.utils, "is_python3_executable", side_effect=[False, False]):
                 self.assertFalse(sublack.utils.find_python3_executable())
 
         # if python3 is the first
-        with patch.object(
-            sublack.utils.subprocess, "check_output", return_value=b"bla\r\npython2\r\n"
-        ):
-            with patch.object(
-                sublack.utils, "is_python3_executable", side_effect=[True, False]
-            ):
+        with patch.object(sublack.utils.subprocess, "check_output", return_value=b"bla\r\npython2\r\n"):
+            with patch.object(sublack.utils, "is_python3_executable", side_effect=[True, False]):
                 self.assertEqual(sublack.utils.find_python3_executable(), "bla")
 
         # if python3 is the last
@@ -397,9 +351,7 @@ class TestPythonExecutable(TestCase):
             "check_output",
             return_value=b"bla\r\nC:\\Users\\bla\\AppData\\Local\\Programs\\Python\\Python37-32\\python.exe\r\n",
         ):
-            with patch.object(
-                sublack.utils, "is_python3_executable", side_effect=[False, True]
-            ):
+            with patch.object(sublack.utils, "is_python3_executable", side_effect=[False, True]):
                 self.assertEqual(
                     sublack.utils.find_python3_executable(),
                     "C:\\Users\\bla\\AppData\\Local\\Programs\\Python\\Python37-32\\python.exe",
@@ -415,35 +367,21 @@ class TestPythonExecutable(TestCase):
     def test_get_python3_executable_by_find(self):
 
         with patch.object(sublack.utils, "is_python3_executable", return_value=False):
-            with patch.object(
-                sublack.utils, "find_python3_executable", return_value="/bla/bla"
-            ):
+            with patch.object(sublack.utils, "find_python3_executable", return_value="/bla/bla"):
                 self.assertEqual(sublack.utils.get_python3_executable({}), "/bla/bla")
 
     def test_get_python3_executable_by_black_command(self):
 
-        with patch.object(
-            sublack.utils, "is_python3_executable", side_effect=[False, False, True]
-        ):
-            with patch.object(
-                sublack.utils, "find_python3_executable", return_value=False
-            ):
+        with patch.object(sublack.utils, "is_python3_executable", side_effect=[False, False, True]):
+            with patch.object(sublack.utils, "find_python3_executable", return_value=False):
                 path = Path("/path", "to", "black")
                 self.assertEqual(
-                    sublack.utils.get_python3_executable({"black_command": str(path)}),
-                    str(path.parent / "python"),
+                    sublack.utils.get_python3_executable({"black_command": str(path)}), str(path.parent / "python"),
                 )
 
         # not python3
-        with patch.object(
-            sublack.utils, "is_python3_executable", side_effect=[False, False, False]
-        ):
-            with patch.object(
-                sublack.utils, "find_python3_executable", return_value=False
-            ):
+        with patch.object(sublack.utils, "is_python3_executable", side_effect=[False, False, False]):
+            with patch.object(sublack.utils, "find_python3_executable", return_value=False):
                 self.assertEqual(
-                    sublack.utils.get_python3_executable(
-                        {"black_command": "/path/to/black"}
-                    ),
-                    False,
+                    sublack.utils.get_python3_executable({"black_command": "/path/to/black"}), False,
                 )

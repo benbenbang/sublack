@@ -1,10 +1,12 @@
+# standard library
 import os
+import pathlib
+import tempfile
 from unittest import TestCase, skip  # noqa
 from unittest.mock import MagicMock, patch
 
+# pypi/conda library
 from fixtures import sublack, view
-import pathlib
-import tempfile
 
 
 class TestBlackMethod(TestCase):
@@ -51,9 +53,7 @@ class TestBlackMethod(TestCase):
         # test tearget target-version
         s.config = {"black_command": "black", "black_target_version": ["py36", "py37"]}
         a = gcl(s, v)
-        self.assertEqual(
-            a, ["black", "-", "--target-version", "py36", "--target-version", "py37"]
-        )
+        self.assertEqual(a, ["black", "-", "--target-version", "py36", "--target-version", "py37"])
 
         # test pyi
         s.config = {"black_command": "black"}
@@ -80,9 +80,7 @@ class TestBlackMethod(TestCase):
         self.assertEqual(e, "utf-32")
 
         s.view.encoding.return_value = "Undefined"
-        with patch.object(
-            sublack.blacker, "get_encoding_from_file", return_value="utf-16"
-        ):
+        with patch.object(sublack.blacker, "get_encoding_from_file", return_value="utf-16"):
             c, e = gc(s)
             self.assertEqual(e, "utf-16")
 
@@ -115,8 +113,7 @@ class TestBlackMethod(TestCase):
                 a = rb(s, ["black", "-"], os.environ.copy(), None, "hello".encode())
             except OSError as e:
                 self.assertEqual(
-                    str(e),
-                    "You may need to install Black and/or configure 'black_command' in Sublack's Settings.",
+                    str(e), "You may need to install Black and/or configure 'black_command' in Sublack's Settings.",
                 )
 
     def test_good_working_dir(self):
@@ -151,9 +148,7 @@ class TestCache(TestCase):
         self.ah = str(hash("a"))
         self.bh = str(hash("b"))
         self.cmd1 = ["cmd1"]
-        self.cache = (
-            self.ah + "|||" + str(self.cmd1) + "\n" + self.bh + "|||" + str(self.cmd1)
-        )
+        self.cache = self.ah + "|||" + str(self.cmd1) + "\n" + self.bh + "|||" + str(self.cmd1)
         # view
         self.black = sublack.blacker.Black(self.view)
 
@@ -192,9 +187,7 @@ class TestCache(TestCase):
         self.assertTrue(self.black.add_to_cache("c", self.cmd1))
         self.assertEqual(
             self.black.formatted_cache.open().read(),
-            "{}|||['cmd1']\n{}|||['cmd1']\n{}|||['cmd1']".format(
-                str(hash("c")), self.ah, self.bh
-            ),
+            "{}|||['cmd1']\n{}|||['cmd1']\n{}|||['cmd1']".format(str(hash("c")), self.ah, self.bh),
         )
 
     def test_limite_cache_size(self):

@@ -2,12 +2,14 @@
 """
 Sublime Text 3 Plugin to invoke Black on a Python file.
 """
-import os.path
+# standard library
 import locale
 import os
-import subprocess
+import os.path
 import re
+import subprocess
 
+# pypi/conda library
 import sublime
 import sublime_plugin
 
@@ -142,9 +144,7 @@ class Black:
         # win32: hide console window
         if sublime.platform() == "windows":
             startup_info = subprocess.STARTUPINFO()
-            startup_info.dwFlags = (
-                subprocess.CREATE_NEW_CONSOLE | subprocess.STARTF_USESHOWWINDOW
-            )
+            startup_info.dwFlags = subprocess.CREATE_NEW_CONSOLE | subprocess.STARTF_USESHOWWINDOW
             startup_info.wShowWindow = subprocess.SW_HIDE
         else:
             startup_info = None
@@ -173,21 +173,13 @@ class Black:
 
         return content, encoding
 
-<<<<<<< HEAD
-    def run_black(self, cmd, env, cwd, content):
-=======
     def get_cwd(self):
         file = self.view.file_name()
         cwd = None
         cwd = os.path.dirname(self.view.file_name()) if file else None
         return cwd
 
-    def run_black(self, cmd, env, content):
-<<<<<<< HEAD
->>>>>>> a2dd53a (add get_cwd)
-
-=======
->>>>>>> 5b5c933 (fix pyproject)
+    def run_black(self, cmd, env, cwd, content):
         try:
             p = subprocess.Popen(
                 cmd,
@@ -203,16 +195,12 @@ class Black:
         except UnboundLocalError as err:  # unboud pour p si popen echoue
             msg = "You may need to install Black and/or configure 'black_command' in Sublack's Settings."
             sublime.error_message("OSError: %s\n\n%s" % (err, msg))
-            raise OSError(
-                "You may need to install Black and/or configure 'black_command' in Sublack's Settings."
-            )
+            raise OSError("You may need to install Black and/or configure 'black_command' in Sublack's Settings.")
 
         except OSError as err:  # unboud pour p si popen echoue
             msg = "You may need to install Black and/or configure 'black_command' in Sublack's Settings."
             sublime.error_message("OSError: %s\n\n%s" % (err, msg))
-            raise OSError(
-                "You may need to install Black and/or configure 'black_command' in Sublack's Settings."
-            )
+            raise OSError("You may need to install Black and/or configure 'black_command' in Sublack's Settings.")
         return p.returncode, out, err
 
     def do_diff(self, edit, out, encoding):

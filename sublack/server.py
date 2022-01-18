@@ -1,20 +1,17 @@
-import subprocess
-import sublime
-import requests
-import time
+# standard library
+import logging
 import os
+import subprocess
 import sys
 import tempfile
-import logging
-from .utils import (
-    cache_path,
-    kill_with_pid,
-    popen,
-    get_open_port,
-    check_blackd_on_http,
-    get_python3_executable,
-)
+import time
+
+# pypi/conda library
+import requests
+import sublime
+
 from .consts import PACKAGE_NAME
+from .utils import cache_path, check_blackd_on_http, get_open_port, get_python3_executable, kill_with_pid, popen
 
 LOG = logging.getLogger(PACKAGE_NAME)
 
@@ -31,9 +28,7 @@ class BlackdServer:
         self.pid_path = cache_path() / "pid"
         self.timeout = kwargs.get("timeout", 5)
         self.sleep_time = kwargs.get("sleep_time", 0.1)
-        default_watched = (
-            "plugin_host.exe" if sublime.platform() == "windows" else "plugin_host"
-        )
+        default_watched = "plugin_host.exe" if sublime.platform() == "windows" else "plugin_host"
         self.watched = kwargs.get("watched", default_watched)
         self.checker_interval = kwargs.get("checker_interval", None)
         self.settings = kwargs.get("settings", None)
@@ -140,11 +135,7 @@ class BlackdServer:
 
             checker = tempfile.NamedTemporaryFile(suffix="checker.py", delete=False)
             with checker:
-                checker.write(
-                    sublime.load_resource("Packages/sublack/sublack/checker.py").encode(
-                        "utf8"
-                    )
-                )
+                checker.write(sublime.load_resource("Packages/sublack/sublack/checker.py").encode("utf8"))
             LOG.debug("checker tempfile: %s", checker.name)
             checker_cmd = [
                 python_executable,
@@ -154,11 +145,7 @@ class BlackdServer:
             ]
 
             # set timeout of interval
-            checker_cmd = (
-                checker_cmd
-                if not self.checker_interval
-                else checker_cmd + [str(self.checker_interval)]
-            )
+            checker_cmd = checker_cmd if not self.checker_interval else checker_cmd + [str(self.checker_interval)]
 
             if python_executable:
                 LOG.debug("Running checker with args %s", checker_cmd)

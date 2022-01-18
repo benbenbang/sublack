@@ -1,17 +1,11 @@
+# standard library
 from unittest import TestCase
 from unittest.mock import patch
 
-import sublime
-from fixtures import (
-    sublack,
-    blacked,
-    unblacked,
-    diff,
-    TestCaseBlack,
-    TestCaseBlackAsync,
-)
-
+# pypi/conda library
 import requests
+import sublime
+from fixtures import TestCaseBlack, TestCaseBlackAsync, blacked, diff, sublack, unblacked
 
 Path = sublack.utils.Path
 
@@ -49,8 +43,7 @@ class TestBlack(TestCaseBlack):
         self.view.run_command("black_file")
         self.assertEqual(blacked, self.all())
         self.assertEqual(
-            self.view.get_status(sublack.consts.STATUS_KEY),
-            sublack.consts.ALREADY_FORMATTED_MESSAGE,
+            self.view.get_status(sublack.consts.STATUS_KEY), sublack.consts.ALREADY_FORMATTED_MESSAGE,
         )
 
     def test_black_file_nothing_todo_cached(self, s, c):
@@ -63,8 +56,7 @@ class TestBlack(TestCaseBlack):
         self.view.run_command("black_file")
         self.assertEqual(blacked, self.all())
         self.assertEqual(
-            self.view.get_status(sublack.consts.STATUS_KEY),
-            sublack.consts.ALREADY_FORMATTED_MESSAGE_CACHE,
+            self.view.get_status(sublack.consts.STATUS_KEY), sublack.consts.ALREADY_FORMATTED_MESSAGE_CACHE,
         )
 
     def test_black_file_dirty_stay_dirty(self, s, c):
@@ -87,9 +79,7 @@ class TestBlack(TestCaseBlack):
         res = sublime.Region(v.lines(res)[2].begin(), v.size())
         res = v.substr(res).strip()
         self.assertEqual(res, diff)
-        self.assertEqual(
-            v.settings().get("syntax"), "Packages/Diff/Diff.sublime-syntax"
-        )
+        self.assertEqual(v.settings().get("syntax"), "Packages/Diff/Diff.sublime-syntax")
         self.view = backup
         v.set_scratch(True)
         v.close()
@@ -114,9 +104,8 @@ class TestBlack(TestCaseBlack):
 """,
             self.all(),
         )
-        self.assertEquals(
-            self.view.unfold(sublime.Region(0, self.view.size())),
-            [sublime.Region(21, 55)],
+        self.assertEqual(
+            self.view.unfold(sublime.Region(0, self.view.size())), [sublime.Region(21, 55)],
         )
 
     def test_folding2(self, s, c):
@@ -139,9 +128,8 @@ class A:
 """,
             self.all(),
         )
-        self.assertEquals(
-            self.view.unfold(sublime.Region(0, self.view.size())),
-            [sublime.Region(8, 55)],
+        self.assertEqual(
+            self.view.unfold(sublime.Region(0, self.view.size())), [sublime.Region(8, 55)],
         )
 
 
@@ -153,7 +141,7 @@ class TestBlackdServer(TestCase):
         self.view = sublime.active_window().new_file()
         self.settings = self.view.settings()
         # make sure we have a window to work with
-        [self.settings.set(k, v) for k, v in SETTINGS.items()]
+        [self.settings.set(k, v) for k, v in list(SETTINGS.items())]
         self.settings.set("close_windows_when_empty", False)
 
     def tearDown(self):
@@ -166,13 +154,9 @@ class TestBlackdServer(TestCase):
     def test_startblackd(self):
         # First normal Run
         self.view.run_command("blackd_start")
-        self.assertTrue(
-            sublack.check_blackd_on_http(self.port), "should have been formatted"
-        )
+        self.assertTrue(sublack.check_blackd_on_http(self.port), "should have been formatted")
         self.assertEqual(
-            self.view.get_status(sublack.STATUS_KEY),
-            sublack.BLACKD_STARTED.format(self.port),
-            "sould tell it starts",
+            self.view.get_status(sublack.STATUS_KEY), sublack.BLACKD_STARTED.format(self.port), "sould tell it starts",
         )
 
         # already running aka port in use
@@ -188,30 +172,22 @@ class TestBlackdServer(TestCase):
         # set up
         self.view.run_command("blackd_start")
         self.assertTrue(
-            sublack.check_blackd_on_http(self.port),
-            "ensure blackd is running for the test",
+            sublack.check_blackd_on_http(self.port), "ensure blackd is running for the test",
         )
 
         # already running, normal way
         sublime.run_command("blackd_stop")
         self.assertRaises(
-            requests.ConnectionError,
-            lambda: requests.post(
-                "http://localhost:" + self.port, "server should be down"
-            ),
+            requests.ConnectionError, lambda: requests.post("http://localhost:" + self.port, "server should be down"),
         )
         self.assertEqual(
-            self.view.get_status(sublack.STATUS_KEY),
-            sublack.BLACKD_STOPPED,
-            "should tell it stops",
+            self.view.get_status(sublack.STATUS_KEY), sublack.BLACKD_STOPPED, "should tell it stops",
         )
 
         # already stopped
         sublime.run_command("blackd_stop")
         self.assertEqual(
-            self.view.get_status(sublack.STATUS_KEY),
-            sublack.BLACKD_STOP_FAILED,
-            "status tell stop failed",
+            self.view.get_status(sublack.STATUS_KEY), sublack.BLACKD_STOP_FAILED, "status tell stop failed",
         )
 
     # @patch.object(sublack.utils, "find_python3_executable", return_value=False)

@@ -1,20 +1,18 @@
-import time
-import subprocess
-import platform
-import os
-import signal
-import re
+# standard library
 import argparse
 import logging
-
+import os
+import platform
+import re
+import signal
+import subprocess
+import time
 
 DEFAULT_INTERVAL = 5
 
 
 LOG = logging.getLogger("blackdserver_checker")
-formatter = logging.Formatter(
-    "[blackdserver_checker:%(funcName)s:%(lineno)d](%(levelname)s) %(message)s"
-)
+formatter = logging.Formatter("[blackdserver_checker:%(funcName)s:%(lineno)d](%(levelname)s) %(message)s")
 dh = logging.StreamHandler()
 dh.setFormatter(formatter)
 LOG.addHandler(dh)
@@ -39,11 +37,7 @@ class Checker:
 
     def is_running_windows(self):
         tasklist = (
-            subprocess.Popen(
-                ["tasklist", "/FO", "CSV"],
-                stdout=subprocess.PIPE,
-                startupinfo=self.windows_prepare(),
-            )
+            subprocess.Popen(["tasklist", "/FO", "CSV"], stdout=subprocess.PIPE, startupinfo=self.windows_prepare(),)
             .stdout.read()
             .splitlines()
         )
@@ -61,9 +55,7 @@ class Checker:
                 target_found = True
 
             if watched_found and target_found:
-                LOG.info(
-                    'watched "%s" and target "%d" found', self.watched, self.target
-                )
+                LOG.info('watched "%s" and target "%d" found', self.watched, self.target)
                 return True
 
         LOG.info("target or watched not running anymore")
@@ -81,11 +73,7 @@ class Checker:
 
             splitted = task.split(maxsplit=4)
 
-            if (
-                self.watched in splitted[4]
-                and b"checker.py" not in splitted[4]
-                and splitted[2] != b"Z"
-            ):
+            if self.watched in splitted[4] and b"checker.py" not in splitted[4] and splitted[2] != b"Z":
                 watched_found = True
                 LOG.debug("watched found at line %s", task)
 
@@ -95,9 +83,7 @@ class Checker:
 
             if watched_found and target_found:
                 LOG.info(
-                    'watched "%s" and target "%d" found',
-                    self.watched.decode(),
-                    self.target,
+                    'watched "%s" and target "%d" found', self.watched.decode(), self.target,
                 )
                 return True
 
@@ -126,8 +112,7 @@ class Checker:
         if platform.system() == "Windows":
             # need to properly kill precess traa
             subprocess.call(
-                ["taskkill", "/F", "/T", "/PID", str(self.target)],
-                startupinfo=self.windows_prepare(),
+                ["taskkill", "/F", "/T", "/PID", str(self.target)], startupinfo=self.windows_prepare(),
             )
         else:
             os.kill(self.target, signal.SIGTERM)
@@ -150,15 +135,9 @@ if __name__ == "__main__":
     parser.add_argument("watched", type=str, help="Watched program's name")
     parser.add_argument("target", type=int, help="target's pid")
     parser.add_argument(
-        "interval",
-        nargs="?",
-        type=int,
-        default=DEFAULT_INTERVAL,
-        help="interval between each check, default is 5",
+        "interval", nargs="?", type=int, default=DEFAULT_INTERVAL, help="interval between each check, default is 5",
     )
-    parser.add_argument(
-        "-v", "--verbose", help="increase output verbosity", action="count", default=0
-    )
+    parser.add_argument("-v", "--verbose", help="increase output verbosity", action="count", default=0)
 
     args = parser.parse_args()
 

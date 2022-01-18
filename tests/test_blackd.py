@@ -2,10 +2,12 @@
 TODO : test headers
 """
 
+# standard library
 from unittest.mock import patch
 
+# pypi/conda library
 import sublime
-from fixtures import sublack, blacked, unblacked, diff, TestCaseBlack
+from fixtures import TestCaseBlack, blacked, diff, sublack, unblacked
 
 blackd_proc = sublack.server.BlackdServer()
 
@@ -62,8 +64,7 @@ class TestBlackdServer(TestCaseBlack):
         self.view.run_command("black_file")
         self.assertEqual(blacked, self.all())
         self.assertEqual(
-            self.view.get_status(sublack.consts.STATUS_KEY),
-            sublack.consts.ALREADY_FORMATTED_MESSAGE,
+            self.view.get_status(sublack.consts.STATUS_KEY), sublack.consts.ALREADY_FORMATTED_MESSAGE,
         )
 
     def test_black_file_nothing_todo_cached(self, s, c):
@@ -76,8 +77,7 @@ class TestBlackdServer(TestCaseBlack):
         self.view.run_command("black_file")
         self.assertEqual(blacked, self.all())
         self.assertEqual(
-            self.view.get_status(sublack.consts.STATUS_KEY),
-            sublack.consts.ALREADY_FORMATTED_MESSAGE_CACHE,
+            self.view.get_status(sublack.consts.STATUS_KEY), sublack.consts.ALREADY_FORMATTED_MESSAGE_CACHE,
         )
 
     def test_do_diff(self, s, c):
@@ -93,9 +93,7 @@ class TestBlackdServer(TestCaseBlack):
         res = sublime.Region(v.lines(res)[2].begin(), v.size())
         res = v.substr(res).strip()
         self.assertEqual(res, diff)
-        self.assertEqual(
-            v.settings().get("syntax"), "Packages/Diff/Diff.sublime-syntax"
-        )
+        self.assertEqual(v.settings().get("syntax"), "Packages/Diff/Diff.sublime-syntax")
         self.view = backup
         v.set_scratch(True)
         v.close()
@@ -109,11 +107,7 @@ class TestBlackdServerNotRunning(TestCaseBlack):
         self.BASE_SETTINGS["black_blackd_port"] = "123465789"
 
     def test_blackd_not_runnint(self, s):
-        with patch.object(
-            sublack.blacker, "get_settings", return_value=self.BASE_SETTINGS
-        ):
+        with patch.object(sublack.blacker, "get_settings", return_value=self.BASE_SETTINGS):
             with patch("sublime.message_dialog") as m:
                 self.view.run_command("black_file")
-                m.assert_called_with(
-                    "blackd not running on port 123465789, you can start it with blackd_start command"
-                )
+                m.assert_called_with("blackd not running on port 123465789, you can start it with blackd_start command")

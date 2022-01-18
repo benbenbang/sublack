@@ -1,19 +1,19 @@
-  _____ __ __  ____   _       ____    __  __  _ 
+  _____ __ __  ____   _       ____    __  __  _
  / ___/|  T  T|    \ | T     /    T  /  ]|  l/ ]
-(   \_ |  |  ||  o  )| |    Y  o  | /  / |  ' / 
- \__  T|  |  ||     T| l___ |     |/  /  |    \ 
+(   \_ |  |  ||  o  )| |    Y  o  | /  / |  ' /
+ \__  T|  |  ||     T| l___ |     |/  /  |    \
  /  \ ||  :  ||  O  ||     T|  _  /   \_ |     Y
  \    |l     ||     ||     ||  |  \     ||  .  |
   \___j \__,_jl_____jl_____jl__j__j\____jl__j\_j
-                                                
-                                                                        
+
+
 
 
 Installation
 -------------
 
 Install Black. Minimal version : 19.3b
-   
+
 	  pip install black # Requires python 3.6
 	  and
 	  pip install black[d] # for blackd support

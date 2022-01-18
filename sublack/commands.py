@@ -1,22 +1,26 @@
-import sublime_plugin
+# standard library
+import logging
+import subprocess
+
+# pypi/conda library
 import sublime
+import sublime_plugin
+
+from .blacker import Black
 from .consts import (
     BLACK_ON_SAVE_VIEW_SETTING,
-    STATUS_KEY,
-    BLACKD_STARTED,
-    BLACKD_STOPPED,
-    BLACKD_START_FAILED,
-    BLACKD_STOP_FAILED,
-    PACKAGE_NAME,
     BLACKD_ALREADY_RUNNING,
-    REFORMATTED_MESSAGE,
+    BLACKD_START_FAILED,
+    BLACKD_STARTED,
+    BLACKD_STOP_FAILED,
+    BLACKD_STOPPED,
+    PACKAGE_NAME,
     REFORMAT_ERRORS,
+    REFORMATTED_MESSAGE,
+    STATUS_KEY,
 )
-from .utils import get_settings, check_blackd_on_http, get_on_save_fast, timed, popen
-from .blacker import Black
-import logging
 from .server import BlackdServer
-import subprocess
+from .utils import check_blackd_on_http, get_on_save_fast, get_settings, popen, timed
 
 LOG = logging.getLogger(PACKAGE_NAME)
 
@@ -46,9 +50,7 @@ class BlackFileCommand(sublime_plugin.TextCommand):
         # re apply view position
         # fix : https://github.com/jgirardet/sublack/issues/52
         # not tested : view.run_command doesn't reproduce bug in tests...
-        sublime.set_timeout_async(
-            lambda: self.view.set_viewport_position(old_view_port)
-        )
+        sublime.set_timeout_async(lambda: self.view.set_viewport_position(old_view_port))
 
 
 class BlackDiffCommand(sublime_plugin.TextCommand):
@@ -125,9 +127,7 @@ class BlackdStartCommand(sublime_plugin.TextCommand):
             self.view.set_status(STATUS_KEY, BLACKD_ALREADY_RUNNING.format(port))
             return
         elif port_free:
-            sv = BlackdServer(
-                deamon=True, host="localhost", port=port, settings=settings
-            )
+            sv = BlackdServer(deamon=True, host="localhost", port=port, settings=settings)
             started = sv.run()
 
         if started:
@@ -147,9 +147,7 @@ class BlackdStopCommand(sublime_plugin.ApplicationCommand):
         if BlackdServer().stop_deamon():
             sublime.active_window().active_view().set_status(STATUS_KEY, BLACKD_STOPPED)
         else:
-            sublime.active_window().active_view().set_status(
-                STATUS_KEY, BLACKD_STOP_FAILED
-            )
+            sublime.active_window().active_view().set_status(STATUS_KEY, BLACKD_STOP_FAILED)
 
 
 class BlackEventListener(sublime_plugin.EventListener):
@@ -185,12 +183,7 @@ class BlackFormatAllCommand(sublime_plugin.WindowCommand):
         errors = []
         dispatcher = None
         for folder in folders:
-            p = popen(
-                ["black", "."],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                cwd=folder,
-            )
+            p = popen(["black", "."], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=folder,)
             p.wait(timeout=10)
             dispatcher = success if p.returncode == 0 else errors
             dispatcher.append((folder, p.returncode, p.stderr.read()))
@@ -201,13 +194,7 @@ class BlackFormatAllCommand(sublime_plugin.WindowCommand):
             self.window.active_view().set_status(STATUS_KEY, REFORMAT_ERRORS)
 
         for out in success:
-            LOG.debug(
-                "black formatted folder %s with returncode %s and following en stderr :%s",
-                *out
-            )
+            LOG.debug("black formatted folder %s with returncode %s and following en stderr :%s", *out)
 
         for out in errors:
-            LOG.error(
-                "black formatted folder %s with returncode %s and following en stderr :%s",
-                *out
-            )
+            LOG.error("black formatted folder %s with returncode %s and following en stderr :%s", *out)

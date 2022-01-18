@@ -1,11 +1,17 @@
-import sublime
+# standard library
 import logging
+
+# pypi/conda library
+import sublime
+
 from .consts import PACKAGE_NAME
 
 LOG = logging.getLogger(PACKAGE_NAME)
-from .utils import popen
-import subprocess
+# standard library
 import json
+import subprocess
+
+from .utils import popen
 
 
 class FoldingError(Exception):
@@ -15,10 +21,7 @@ class FoldingError(Exception):
 def get_folded_lines(view):
     """ return line number corresponding to each folded statement.
     Turned to 1-based to fit ast numbers."""
-    return [
-        view.rowcol(f.begin())[0] + 1
-        for f in view.unfold(sublime.Region(0, view.size()))
-    ]
+    return [view.rowcol(f.begin())[0] + 1 for f in view.unfold(sublime.Region(0, view.size()))]
 
 
 def get_region_to_refold(line, view):
@@ -60,14 +63,11 @@ def get_index_with_interpreter(view, body, encoding):
 
 def get_index_with_python33(body):
     """ extract an index for each ast node using the sublime python version"""
+    # standard library
     import ast
 
     try:
-        return [
-            getattr(node, "lineno")
-            for node in ast.walk(ast.parse(body))
-            if hasattr(node, "lineno")
-        ]
+        return [getattr(node, "lineno") for node in ast.walk(ast.parse(body)) if hasattr(node, "lineno")]
     except SyntaxError as err:
         LOG.error(
             """Sublack can't parse this python version to apply folding.
@@ -91,7 +91,7 @@ def get_ast_index(view, body, encoding):
 
 
 def get_new_lines(old, new, folded_lines):
-    """get new lines comparing index. minus one a the end to 
+    """get new lines comparing index. minus one a the end to
     fit turn back to 0-based sublime line numbers"""
     old_index = {}  # dict to not add a line twice
     for index, line in enumerate(old):
@@ -100,7 +100,7 @@ def get_new_lines(old, new, folded_lines):
         if len(old_index) == len(folded_lines):
             break
 
-    return [new[x] - 1 for x in old_index.values()]
+    return [new[x] - 1 for x in list(old_index.values())]
 
 
 def refold_all(old, new, view, folded_lines):

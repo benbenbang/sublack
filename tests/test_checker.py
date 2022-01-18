@@ -1,12 +1,13 @@
-from fixtures import sublack as s
-
-from unittest.mock import patch
-from unittest import TestCase, skipIf
-
-import subprocess
+# standard library
 import os
-import platform
 import pathlib
+import platform
+import subprocess
+from unittest import TestCase, skipIf
+from unittest.mock import patch
+
+# pypi/conda library
+from fixtures import sublack as s
 
 Checker = s.Checker
 popen = s.popen
@@ -61,9 +62,7 @@ class TestIsRunningUnix(TestCase):
         self.assertFalse(c.is_running())
 
     def test_do_not_take_checker_args_in_account_return_false(self):
-        p = subprocess.Popen(
-            ["python3", "checker.py", "head", "987654"], cwd=str(sublack_dir)
-        )
+        p = subprocess.Popen(["python3", "checker.py", "head", "987654"], cwd=str(sublack_dir))
         c = Checker("head", os.getpid())
         try:
             self.assertFalse(c.is_running())
@@ -110,10 +109,7 @@ class TestRunUnix(TestCase):
         self.w = subprocess.Popen(["sleep", "3"])
         self.t = subprocess.Popen(["man", "vi"])
 
-        self.p = subprocess.Popen(
-            ["python3", "checker.py", "sleep", str(self.t.pid), "0"],
-            cwd=str(sublack_dir),
-        )
+        self.p = subprocess.Popen(["python3", "checker.py", "sleep", str(self.t.pid), "0"], cwd=str(sublack_dir),)
 
     def tearDown(self):
         for x in (self.w, self.t, self.p):
@@ -153,14 +149,7 @@ class TestRunWindows(TestCase):
         self.t = popen(["CHOICE", "/C:AB", "/T:10", "/D:A"])
 
         self.p = popen(
-            [
-                s.utils.get_python3_executable(),
-                "checker.py",
-                "timeout",
-                str(self.t.pid),
-                "0",
-            ],
-            cwd=str(sublack_dir),
+            [s.utils.get_python3_executable(), "checker.py", "timeout", str(self.t.pid), "0",], cwd=str(sublack_dir),
         )
 
     def tearDown(self):
